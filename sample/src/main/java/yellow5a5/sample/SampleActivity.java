@@ -5,9 +5,13 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import yellow5a5.nougatnetworktool.NetworkListener;
+import yellow5a5.nougatnetworktool.NougatNetworkTool;
 
 public class SampleActivity extends AppCompatActivity {
 
@@ -15,6 +19,18 @@ public class SampleActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sample);
+        NougatNetworkTool.addNetworkListener(new NetworkListener() {
+            @Override
+            public void onNoConnect(int type) {
+
+            }
+
+            @Override
+            public void onConnect(int type) {
+
+            }
+        });
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
