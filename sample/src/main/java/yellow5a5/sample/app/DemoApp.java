@@ -1,7 +1,11 @@
 package yellow5a5.sample.app;
 
+import android.app.Activity;
 import android.app.Application;
+import android.os.Bundle;
+import android.util.Log;
 
+import yellow5a5.nougatnetworktool.ActivityLifeAdapter;
 import yellow5a5.nougatnetworktool.NougatNetworkTool;
 
 /**
@@ -14,5 +18,6 @@ public class DemoApp extends Application{
     public void onCreate() {
         super.onCreate();
         NougatNetworkTool.getInstance().init(this);
+        registerActivityLifecycleCallbacks(new ActivityLifeAdapter(this));
     }
 }

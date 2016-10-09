@@ -1,11 +1,10 @@
 package yellow5a5.sample;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -13,13 +12,13 @@ import android.view.MenuItem;
 import yellow5a5.nougatnetworktool.NetworkListener;
 import yellow5a5.nougatnetworktool.NougatNetworkTool;
 
-public class SampleActivity extends AppCompatActivity {
+public class ASampleActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_sample);
-        NougatNetworkTool.addNetworkListener(new NetworkListener() {
+        setContentView(R.layout.activity_sample_a);
+        NougatNetworkTool.getInstance().registerNetworkListener(new NetworkListener() {
             @Override
             public void onNoConnect(int type) {
 
@@ -38,8 +37,8 @@ public class SampleActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                Intent intent = new Intent(ASampleActivity.this, BSampleActivity.class);
+                startActivity(intent);
             }
         });
     }

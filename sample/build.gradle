@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "yellow5a5.sample"
-        minSdkVersion 17
+        minSdkVersion 14
         targetSdkVersion 24
         versionCode 1
         versionName "1.0"
