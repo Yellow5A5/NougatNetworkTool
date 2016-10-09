@@ -32,7 +32,7 @@ public class NougatNetworkTool {
     private TelephonyManager mTelephonyManager;
     private List<NetworkListener> mListenerList = new LinkedList<>();
 
-    private int mNowNetworkType = -1;
+    private String mTypeName;
 
     public static NougatNetworkTool getInstance() {
         if (mInstance == null) {
@@ -101,7 +101,6 @@ public class NougatNetworkTool {
      * @return the tpye of network.
      */
     public int getNetworkTypeClass() {
-        //TODO add isConnected() to judge, return UNCONNECTED if get not.
         switch (mTelephonyManager.getNetworkType()) {
             case Constants.NETWORK_TYPE_GPRS:
             case Constants.NETWORK_TYPE_GSM:
@@ -146,70 +145,29 @@ public class NougatNetworkTool {
         }
     }
 
-//    class NetworkReceiver extends BroadcastReceiver {
-//        private static boolean firstConnect = true;
-//        @Override
-//        synchronized public void onReceive(Context context, Intent intent) {
-//
-//            if (mListenerList.isEmpty()) {
-//                return;
-//            }
-//            final ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-//            final NetworkInfo activeNetInfo = connectivityManager.getActiveNetworkInfo();
-//            if (activeNetInfo != null) {
-//                if(firstConnect) {
-//                    // do subroutines here
-//                    firstConnect = false;
-//                }
-//            }
-//            else {
-//                firstConnect= true;
-//            }
-//
-//
-//            int mTempNetworkType = getNetworkTypeClass(mTelephonyManager.getNetworkType());
-//            boolean tempIsConnect = !intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
-//
-//            Log.e(NetworkReceiver.class.getName(), "============Test 1 ============= ");
-//            if (mConnectivityManager.getActiveNetworkInfo() != null) {
-//                Log.e(NetworkReceiver.class.getName(), "onReceive: " + mConnectivityManager.getActiveNetworkInfo().toString());
-//            }
-//            Log.e(NetworkReceiver.class.getName(), "============Test 2 ============= ");
-//            if (tempIsConnect != isConnect) {
-//                isConnect = tempIsConnect;
-//                if (isConnect) {
-//                    for (int i = 0; i < mListenerList.size(); i++) {
-//                        mListenerList.get(i).onConnect(mTempNetworkType);
-//                    }
-//                } else {
-//                    for (int i = 0; i < mListenerList.size(); i++) {
-//                        mListenerList.get(i).onNoConnect();
-//                    }
-//                }
-//            }
-//        }
-//    }
+    public void recNetworkChangeBroadcast(){
+        if (mListenerList.isEmpty()) {
+            return;
+        }
+        mConnectivityManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        final NetworkInfo activeNetInfo = mConnectivityManager.getActiveNetworkInfo();
+        if (activeNetInfo != null) {
+            if (!activeNetInfo.getTypeName().equals(mTypeName)) {
+                mTypeName = activeNetInfo.getTypeName();
+                connectResponse(mTypeName);
+            }
+        } else {
+            unConnectResponse(mTypeName);
+            mTypeName = "";
+        }
+    }
 
-    private String mTypeName;
 
     public class NetworkReceiver extends BroadcastReceiver {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (mListenerList.isEmpty()) {
-                return;
-            }
-            mConnectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-            final NetworkInfo activeNetInfo = mConnectivityManager.getActiveNetworkInfo();
-            if (activeNetInfo != null) {
-                if (!activeNetInfo.getTypeName().equals(mTypeName)) {
-                    mTypeName = activeNetInfo.getTypeName();
-                    connectResponse(mTypeName);
-                }
-            } else {
-                unConnectResponse(mTypeName);
-                mTypeName = "";
-            }
+            recNetworkChangeBroadcast();
         }
     }
 }

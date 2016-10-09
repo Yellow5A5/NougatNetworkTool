@@ -1,7 +1,10 @@
 package yellow5a5.sample;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
+import android.support.v4.net.ConnectivityManagerCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -18,6 +21,7 @@ public class BSampleActivity extends Activity {
     private Button mTurnBackBtn;
     private Button mGetNetTypeBtn;
     private Button mGetIsConnect;
+    private Button mSendBroadcast;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +30,7 @@ public class BSampleActivity extends Activity {
         this.mTurnBackBtn = (Button) findViewById(R.id.btn_turn_back);
         this.mGetNetTypeBtn = (Button) findViewById(R.id.btn_get_network_type);
         this.mGetIsConnect = (Button) findViewById(R.id.btn_get_is_connect);
+        this.mSendBroadcast = (Button) findViewById(R.id.btn_send_broadcast);
 
         mTurnBackBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -45,6 +50,13 @@ public class BSampleActivity extends Activity {
             @Override
             public void onClick(View v) {
                 Log.e(BSampleActivity.class.getName(), "mGetIsConnect: " + NougatNetworkTool.getInstance().isNetworkAvailable());
+            }
+        });
+
+        mSendBroadcast.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
             }
         });
     }

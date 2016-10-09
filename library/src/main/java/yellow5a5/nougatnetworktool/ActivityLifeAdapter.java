@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -32,11 +33,11 @@ public class ActivityLifeAdapter implements Application.ActivityLifecycleCallbac
     public void onActivityStarted(Activity activity) {
         Log.e(ActivityLifeAdapter.class.getName(), "onActivityStarted: " + activity.getClass().getSimpleName());
         NougatNetworkTool.isForegroundFlag++;
-        if (!TextUtils.isEmpty(mInitialState)){
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M && !TextUtils.isEmpty(mInitialState)){
             ConnectivityManager mConnectivityManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo mNetwork = mConnectivityManager.getActiveNetworkInfo();
             if (mNetwork != null && !mNetwork.getTypeName().equals(mInitialState)){
-                mContext.sendBroadcast(new Intent(ConnectivityManager.CONNECTIVITY_ACTION));
+                NougatNetworkTool.getInstance().recNetworkChangeBroadcast();
             }
         }
 
