@@ -6,11 +6,9 @@ package yellow5a5.nougatnetworktool;
 
 public class Constants {
 
-    public static final String NETWORK_CONNECTIVITY_CHANGE = "android.net.conn.CONNECTIVITY_CHANGE";
-
-    public static final String TYPE_WIFI = "WIFI";
-
-    public static final String TYPE_MOBILE = "MOBILE";
+    /**
+     * Some of them is from TelephonyManager.
+     */
 
     /** Network type is unknown */
     public static final int NETWORK_TYPE_UNKNOWN = 0;
@@ -59,5 +57,10 @@ public class Constants {
     public static final int NETWORK_CLASS_3_G = 2;
     /** Class of broadly defined "4G" networks.  */
     public static final int NETWORK_CLASS_4_G = 3;
+
+
     public static final int NETWORK_CLASS_WIFI = 100;
+    public static final int NETWORK_CLASS_MOBILE = 101;
+
+
 }

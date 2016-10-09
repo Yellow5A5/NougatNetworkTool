@@ -1,5 +1,6 @@
 package yellow5a5.nougatnetworktool;
 
+import android.app.Application;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -20,6 +21,8 @@ import java.util.List;
 
 public class NougatNetworkTool {
 
+    //zero is meaning the application not in foreground.
+    public static int isForegroundFlag = 0;
 
     private static NougatNetworkTool mInstance;
     private static final Object obj = new Object();
@@ -27,9 +30,7 @@ public class NougatNetworkTool {
     private Context mContext;
     private ConnectivityManager mConnectivityManager;
     private TelephonyManager mTelephonyManager;
-    private static List<NetworkListener> mListenerList = new LinkedList<>();
-    ;
-
+    private List<NetworkListener> mListenerList = new LinkedList<>();
 
     private int mNowNetworkType = -1;
 
@@ -37,7 +38,8 @@ public class NougatNetworkTool {
         if (mInstance == null) {
             synchronized (obj) {
                 if (mInstance == null) {
-                    return new NougatNetworkTool();
+                    mInstance = new NougatNetworkTool();
+                    return mInstance;
                 }
             }
         }
@@ -47,29 +49,60 @@ public class NougatNetworkTool {
     public void init(Context context) {
         mContext = context;
         mConnectivityManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-        mTelephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+        mTelephonyManager = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
         IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
         NetworkReceiver mNetworkReceiver = new NetworkReceiver();
         context.registerReceiver(mNetworkReceiver, filter);
     }
 
-    public boolean isConnected() {
-        NetworkInfo netInfo = mConnectivityManager.getActiveNetworkInfo();
-        return netInfo.isConnected();
-    }
-
-    public static void addNetworkListener(@NonNull NetworkListener l) {
+    public void registerNetworkListener(@NonNull NetworkListener l) {
         mListenerList.add(l);
     }
 
-    public static void removeNetworkListener(@NonNull NetworkListener l) {
+    public void unRegisterNetworkListener(@NonNull NetworkListener l) {
         if (mListenerList.contains(l)) {
             mListenerList.remove(l);
         }
     }
 
-    public static int getNetworkClass(int networkType) {
-        switch (networkType) {
+    public boolean isNetworkAvailable() {
+        mConnectivityManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = mConnectivityManager.getActiveNetworkInfo();
+        if (netInfo == null) {
+            return false;
+        } else {
+            return netInfo.isAvailable();
+        }
+    }
+
+    public boolean isMobileAvailable(){
+        mConnectivityManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = mConnectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+        if (netInfo == null) {
+            return false;
+        } else {
+            return netInfo.isAvailable();
+        }
+    }
+
+    public boolean isWifiAvailable(){
+        mConnectivityManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = mConnectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        if (netInfo == null) {
+            return false;
+        } else {
+            return netInfo.isAvailable();
+        }
+    }
+
+    /**
+     * This does not meaning the current state of the network.
+     *
+     * @return the tpye of network.
+     */
+    public int getNetworkTypeClass() {
+        //TODO add isConnected() to judge, return UNCONNECTED if get not.
+        switch (mTelephonyManager.getNetworkType()) {
             case Constants.NETWORK_TYPE_GPRS:
             case Constants.NETWORK_TYPE_GSM:
             case Constants.NETWORK_TYPE_EDGE:
@@ -97,6 +130,22 @@ public class NougatNetworkTool {
         }
     }
 
+    private void connectResponse(String typeName) {
+        int typeClass = NetworkUtil.typeNameToTypeClass(typeName);
+        Log.e(NetworkReceiver.class.getName(), "onReceive CON: " + typeClass);
+        for (int i = 0; i < mListenerList.size(); i++) {
+            mListenerList.get(i).onConnect(typeClass);
+        }
+    }
+
+    private void unConnectResponse(String typeName) {
+        int typeClass = NetworkUtil.typeNameToTypeClass(typeName);
+        Log.e(NetworkReceiver.class.getName(), "onReceive UN: " + typeClass);
+        for (int i = 0; i < mListenerList.size(); i++) {
+            mListenerList.get(i).onNoConnect(typeClass);
+        }
+    }
+
 //    class NetworkReceiver extends BroadcastReceiver {
 //        private static boolean firstConnect = true;
 //        @Override
@@ -118,7 +167,7 @@ public class NougatNetworkTool {
 //            }
 //
 //
-//            int mTempNetworkType = getNetworkClass(mTelephonyManager.getNetworkType());
+//            int mTempNetworkType = getNetworkTypeClass(mTelephonyManager.getNetworkType());
 //            boolean tempIsConnect = !intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
 //
 //            Log.e(NetworkReceiver.class.getName(), "============Test 1 ============= ");
@@ -141,8 +190,6 @@ public class NougatNetworkTool {
 //        }
 //    }
 
-    private int mTypeMark = -1;
-    private boolean firstConnect;
     private String mTypeName;
 
     public class NetworkReceiver extends BroadcastReceiver {
@@ -152,41 +199,17 @@ public class NougatNetworkTool {
             if (mListenerList.isEmpty()) {
                 return;
             }
-            final ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-            final NetworkInfo activeNetInfo = connectivityManager.getActiveNetworkInfo();
+            mConnectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            final NetworkInfo activeNetInfo = mConnectivityManager.getActiveNetworkInfo();
             if (activeNetInfo != null) {
                 if (!activeNetInfo.getTypeName().equals(mTypeName)) {
                     mTypeName = activeNetInfo.getTypeName();
-                    int typeclass = typeNameToTypeClass(mTypeName);
-//                                    mTypeMark = getNetworkClass(mTelephonyManager.getNetworkType());
-
-                    Log.e(NetworkReceiver.class.getName(), "onReceive CON: " + typeclass);
-                    for (int i = 0; i < mListenerList.size(); i++) {
-                        mListenerList.get(i).onConnect(typeclass);
-                    }
+                    connectResponse(mTypeName);
                 }
             } else {
-                int typeclass = typeNameToTypeClass(mTypeName);
-                Log.e(NetworkReceiver.class.getName(), "onReceive UN: " + typeclass);
-                for (int i = 0; i < mListenerList.size(); i++) {
-                    mListenerList.get(i).onNoConnect(typeclass);
-                }
+                unConnectResponse(mTypeName);
                 mTypeName = "";
             }
-        }
-
-        private int typeNameToTypeClass(String typeName) {
-            int typeClass = 0;
-            switch (typeName) {
-                case Constants.TYPE_WIFI:
-                    typeClass = Constants.NETWORK_CLASS_WIFI;
-                    break;
-
-                case Constants.TYPE_MOBILE:
-                    typeClass = Constants.NETWORK_CLASS_4_G;
-                    break;
-            }
-            return typeClass;
         }
     }
 }
