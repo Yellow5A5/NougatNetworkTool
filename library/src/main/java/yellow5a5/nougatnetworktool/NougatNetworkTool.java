@@ -1,6 +1,5 @@
 package yellow5a5.nougatnetworktool;
 
-import android.app.Application;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -9,6 +8,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.annotation.NonNull;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.util.LinkedList;
@@ -21,9 +21,6 @@ import java.util.List;
 
 public class NougatNetworkTool {
 
-    //zero is meaning the application not in foreground.
-    public static int isForegroundFlag = 0;
-
     private static NougatNetworkTool mInstance;
     private static final Object obj = new Object();
 
@@ -32,7 +29,7 @@ public class NougatNetworkTool {
     private TelephonyManager mTelephonyManager;
     private List<NetworkListener> mListenerList = new LinkedList<>();
 
-    private String mTypeName;
+    private String mTypeName = "";
 
     public static NougatNetworkTool getInstance() {
         if (mInstance == null) {
@@ -157,14 +154,15 @@ public class NougatNetworkTool {
                 connectResponse(mTypeName);
             }
         } else {
-            unConnectResponse(mTypeName);
-            mTypeName = "";
+            if(!TextUtils.isEmpty(mTypeName)){
+                unConnectResponse(mTypeName);
+                mTypeName = "";
+            }
         }
     }
 
 
     public class NetworkReceiver extends BroadcastReceiver {
-
         @Override
         public void onReceive(Context context, Intent intent) {
             recNetworkChangeBroadcast();
